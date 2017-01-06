@@ -1,5 +1,5 @@
 # Installation
 
 ```
-pip install git+https://github.com/bhillmann/ml.git --upgrade --no-cache-dir
+pip install git+https://github.com/bhillmann/koko.git --upgrade --no-cache-dir
 ```
