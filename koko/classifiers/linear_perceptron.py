@@ -1,21 +1,23 @@
 """
-    This is an implementation of the mini-batch gradient descent as described in:
-        Pegasos: Primal Estimated sub-GrAdient SOlver for SVM
+    This is an implementation of the mini-batch gradient descent algorithm for a linear perceptron model
 
-    That can be found online at:
-        http://ttic.uchicago.edu/~nati/Publications/PegasosMPB.pdf
+    The class model is based off of sklearn:
+        http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Perceptron.html
 """
-
 import numpy as np
-from sklearn import datasets
-from sklearn.linear_model import Perceptron as sk_Perceptron
 
 from koko.optimization import minibatch_gradient_descent
-from koko.utils import normalize, add_intercept, cross_val_score
+from koko.utils import add_intercept
 
 
 class LinearPerceptron:
     def __init__(self, epochs=5, eta=.01, optimization=None):
+        """
+        A Linear Perceptron implementation using Numpy vector optimizations
+        :param epochs: the number of passes through the data
+        :param eta: the learning rate
+        :param optimization: the optimization method given the data matrix X, and the target vector y
+        """
         self.n_classes = None
         self.weights = None
         self.epochs = epochs
@@ -25,6 +27,11 @@ class LinearPerceptron:
                                                                         self.epochs)
 
     def fit(self, X, y):
+        """
+        Fit the weights of the perceptron
+        :param X: the data to fit
+        :param y: the target vector
+        """
         X = add_intercept(X)
 
         self.n_classes = np.unique(y).shape[0]
@@ -38,39 +45,32 @@ class LinearPerceptron:
         self.weights = self.optimization(X, target)
 
     def _compute_gradient(self, X, y, weights):
+        """
+        Computes the gradient of the perceptron model
+        :param X: data matrix
+        :param y: target vector
+        :param weights: current weights
+        :return: gradient vector
+        """
         y = np.atleast_1d(y)
         X = np.atleast_2d(X)
         errors = y-self._activation_function(np.inner(weights, X))
         return -np.inner(errors, X.T)
 
     def predict(self, X):
+        """
+        Use the fitted model to predict new data
+        :param X: data to predict
+        :return: predicted calls vector
+        """
         X = add_intercept(X)
         temp = self._activation_function(np.inner(self.weights, X))
         return np.array([self.classes[_] for _ in temp.astype(int)])
 
     def _activation_function(self, x):
+        """
+        The activation function for a perceptron
+        :param x: prediction vector
+        :return: binary activation vector
+        """
         return np.array(x >= 0., dtype=np.int)
-
-if __name__ == '__main__':
-    data = datasets.load_boston()
-    X = data.data
-    y = data.target
-
-    X = normalize(X)
-
-    y = y > np.percentile(y, 50)
-    y = y.astype(np.int)
-
-    y = y == 1
-    y = y.astype(int)
-
-    clf = LinearPerceptron(epochs=10, eta=.001)
-    accuracy = np.array(cross_val_score(clf, X, y))
-    print(np.mean(accuracy, axis=0))
-    print(np.std(accuracy, axis=0))
-
-    sk_clf = sk_Perceptron()
-    sk_accuracy = np.array(cross_val_score(sk_clf, X, y))
-    print(np.mean(sk_accuracy, axis=0))
-    print(np.std(sk_accuracy, axis=0))
-
