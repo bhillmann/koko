@@ -39,9 +39,9 @@ class LinearPerceptron:
         if self.n_classes != 2:
             Exception()
 
-        self.classes = dict(zip((0, 1), np.unique(y)))
+        self.classes = dict(zip((-1, 1), np.unique(y)))
 
-        target = np.array([1 if self.classes[1] == _ else 0 for _ in y])
+        target = np.array([1 if self.classes[1] == _ else -1 for _ in y])
         self.weights = self.optimization(X, target)
 
     def _compute_gradient(self, X, y, weights):
@@ -54,8 +54,8 @@ class LinearPerceptron:
         """
         y = np.atleast_1d(y)
         X = np.atleast_2d(X)
-        errors = y-self._activation_function(np.inner(weights, X))
-        return -np.inner(errors, X.T)
+        errors = y-np.inner(weights, X)
+        return np.inner(-errors, X.T)
 
     def predict(self, X):
         """
@@ -73,4 +73,4 @@ class LinearPerceptron:
         :param x: prediction vector
         :return: binary activation vector
         """
-        return np.where(x >= 0., 1, 0)
+        return np.where(x >= 0., 1, -1)
